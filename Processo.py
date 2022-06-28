@@ -9,7 +9,6 @@ id = int(input("Informe o ID referente a sua aplicação (1 ate n)"))
 porta = 5000 + id 
 
 #Lendo o arquivo de topografia, onde cada linha está associada a um id(id 1:linha 1,id 2:linha 2 e assim sucessivamente), de maneira que cada linha informa os vizinhos daquele id    
-#Vale ressaltar que o arquivo de topografia pode ser modificado apos uma eleição, sem ter de reiniciar os clientes devido a função reset
 with open('topografia.txt') as arquivo:
     topografia = arquivo.readlines()
 
