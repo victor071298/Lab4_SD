@@ -1,3 +1,4 @@
+#Programa responsável por iniciar a eleição de lider
 from sys import exit
 import rpyc
 
@@ -9,4 +10,7 @@ while True:
     conn = rpyc.connect('localhost', 5000+int(eleicao[0]))
     resultado = conn.root.exposed_election(eleicao[1])
     print("eleicao concluida, com lider eleito sendo:{}".format(resultado))
+    conn.close()
+    conn = rpyc.connect('localhost', 5000+int(eleicao[0]))
+    conn.root.exposed_reset()
     conn.close()
