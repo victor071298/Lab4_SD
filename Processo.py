@@ -1,3 +1,4 @@
+#Programa responsavel por simular os procesos que farão a eleição de lider, deve ser chamado no terminal n vezes, sendo n a quantidade de linhas(processos) na topografia passada como arquivo
 from unittest.main import main
 import rpyc
 from rpyc.utils.server import ThreadedServer
@@ -6,7 +7,8 @@ from sys import exit
 topografia = []
 id = int(input("Informe o ID referente a sua aplicação (1 ate n)"))
 porta = 5000 + id 
-    
+
+#Lendo o arquivo de topografia, onde cada linha está associada a um id(id 1:linha 1,id 2:linha 2 e assim sucessivamente), de maneira que cada linha informa os vizinhos daquele id    
 with open('topografia.txt') as arquivo:
     topografia = arquivo.readlines()
 
@@ -15,6 +17,7 @@ topografia = topografia.replace("\n","")
 vizinhos = topografia.split(" ")
 print (vizinhos)
 
+#variáveis auxiliares
 probe = False
 no_pai = 0
 retorno = []
@@ -31,6 +34,31 @@ class ProbEcho(rpyc.Service):
     
     def on_disconnect(self,conn):
         print("Conexão encerrada") 
+
+    #Reiniciando os valores para multiplas eleições
+    def exposed_reset(self):
+        global probe
+        global no_pai
+        global filhos
+        global retorno
+        global tipo
+        global wait
+        global inicial
+        global retorno_final
+        global topografia
+        global vizinhos
+        with open('topografia.txt') as arquivo:
+            topografia = arquivo.readlines()
+        topografia = topografia[id-1]
+        topografia = topografia.replace("\n","")
+        vizinhos = topografia.split(" ")
+        probe = False
+        no_pai = 0
+        del retorno[:]
+        del filhos [:]
+        tipo = 0
+        inicial = False
+        retorno_final = 0
     
     def exposed_election(self,tipo):
         global vizinhos
@@ -41,6 +69,7 @@ class ProbEcho(rpyc.Service):
         global filhos
         global retorno_final
         global probe
+        wait = True
         print("Votação iniciada pelo processo {}".format(id))
         print(no_pai)
         #Checando se o node é o que foi iniciado pelo programa auxiliar ou por um probe
@@ -73,7 +102,7 @@ class ProbEcho(rpyc.Service):
                 print("mandando {} iniciar sua eleição".format(int(vizinho)))
                 conn = rpyc.connect('localhost', 5000+int(vizinho))
                 conn.root.exposed_election(tipo)
-                conn.close()                
+                conn.close()                                
         print("Cabaram os vizinho do {}".format(id))
         #Caso aonde o ack é igual ao numero de vizinhos, ou seja, esse node ja pode iniciar seu processo de echo
         print("Filhos do processo {}:{}".format(id,filhos))             
@@ -89,6 +118,8 @@ class ProbEcho(rpyc.Service):
                 conn = rpyc.connect('localhost',5000 + no_pai)
                 conn.root.exposed_echo(id,retorno_final)
                 conn.close()
+                print("Retorno enviado pelo processo {} foi {}".format(id,retorno_final))
+                self.exposed_reset()
             #Processo final, que calculara o resultado real da eleição
             elif filhos == [] and inicial:
                 print("Pra fechar..")
@@ -99,6 +130,7 @@ class ProbEcho(rpyc.Service):
                     return max(retorno)
                 elif tipo == 'm':
                     return min(retorno)
+        wait = True
             
     def exposed_probe(self,id_pai):
         global probe
@@ -115,7 +147,7 @@ class ProbEcho(rpyc.Service):
         
         
     def exposed_echo(self,id_filho,retorno_filho):
-        print("Echo enviado, hora de morbar")
+        print("enviando Echo")
         global retorno
         global filhos
         #Adicionando o retorno global ao retorno dos eu filho
@@ -126,6 +158,7 @@ class ProbEcho(rpyc.Service):
         except:
             print("Falha ao remover {} de {} na função echo dos cria".format(id_filho,filhos))
         print(retorno)
+        print("Echo enviado")
        
             
 #Iniciando o servidor
