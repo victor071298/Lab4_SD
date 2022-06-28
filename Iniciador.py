@@ -11,6 +11,6 @@ while True:
     print("eleicao concluida, com lider eleito sendo:{}".format(resultado))
     conn.close()
     #Resetando os valores
-    conn = rpyc.connect('localhost', 5000+int(eleicao[0]))
-    resultado = conn.root.exposed_reset(eleicao[1])
-    conn.close()
+    #conn = rpyc.connect('localhost', 5000+int(eleicao[0]))
+    #resultado = conn.root.exposed_reset(eleicao[1])
+    #conn.close()
