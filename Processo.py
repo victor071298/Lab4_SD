@@ -1,7 +1,6 @@
 from unittest.main import main
 import rpyc
 from rpyc.utils.server import ThreadedServer
-import random
 from sys import exit
 
 topografia = []
@@ -32,26 +31,6 @@ class ProbEcho(rpyc.Service):
     
     def on_disconnect(self,conn):
         print("Conexão encerrada") 
-
-    def exposed_reset(self):
-        global probe
-        global no_pai
-        global cont
-        global retorno
-        global filhos
-        global tipo
-        global wait
-        global inicial
-        global filho
-        probe = False
-        no_pai = 0
-        cont = 0
-        retorno = []
-        filhos = []
-        tipo = 0
-        wait = True
-        inicial = False
-        filho = []
     
     def exposed_election(self,tipo):
         global vizinhos
@@ -105,7 +84,7 @@ class ProbEcho(rpyc.Service):
             while wait:
                 if filhos == [] and not inicial:
                     wait = False
-                    conn = rpyc.connect('localhost',5000+no_pai)
+                    conn = rpyc.connect('localhost',5000 + no_pai)
                     retorno.append(id)
                     if tipo == 'M':
                         max(retorno)
